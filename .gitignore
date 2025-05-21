@@ -35,3 +35,8 @@
 dumper/dumper
 extractor/extractor
 modifier/modifier
+dumper/NVIDIA-Linux-x86_64-555.58.02.run
+dumper/NVIDIA-Linux-x86_64-555.58.02/
+NVIDIA-Linux-x86_64-515.76/
+NVIDIA-Linux-x86_64-515.76.run
+__pycache__/
