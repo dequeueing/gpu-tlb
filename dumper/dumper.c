@@ -117,11 +117,13 @@ main(int argc, char *argv[])
     goto cleanup;
   }
   
+  // 初始化当前进程的UVM上下文。
   if (ioctl(uvm_dev_fd, UVM_INITIALIZE, &init_params) < 0) {
     printf("cannot initialize uvm\n");
     goto cleanup;
   }
     
+  // 将目标GPU注册到当前UVM上下文中。
   if (ioctl(uvm_dev_fd, UVM_REGISTER_GPU, &reg_params) < 0) {
     printf("cannot register uvm\n");
     goto cleanup;
@@ -138,6 +140,7 @@ main(int argc, char *argv[])
     goto cleanup;
   }
   
+  // mmap the dump file o memory
   dump_ptr = mmap(NULL, dump_size, PROT_WRITE, MAP_SHARED, dump_fd, 0);
   if (dump_ptr == MAP_FAILED)  {
     printf("cannot get memory-mapped file\n");
@@ -145,7 +148,7 @@ main(int argc, char *argv[])
   }
   
   memcpy(&(dump_params.gpu_uuid), &(reg_params.gpu_uuid), 16);
-  dump_params.child_id = gpu_instance_id;
+  // dump_params.child_id = gpu_instance_id;
   dump_params.base_addr = base_addr;
   dump_params.dump_size = dump_size;
   dump_params.out_addr = (unsigned long)dump_ptr;
