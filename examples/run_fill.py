@@ -4,9 +4,12 @@ import subprocess
 import time
 import pagemap
 
-dumper_path = '../dumper/dumper'
-extractor_path = '../extractor/extractor'
-modifier_path = '../modifier/modifier'
+# dumper_path = '../dumper/dumper'
+# extractor_path = '../extractor/extractor'
+# modifier_path = '../modifier/modifier'
+dumper_path = '/home/exouser/gpu-tlb/dumper/dumper'
+extractor_path = '/home/exouser/gpu-tlb/extractor/extractor'
+modifier_path = '/home/exouser/gpu-tlb/modifier/modifier'
 
 target_va = 0x700000000000
 dummy_va = 0x7f0000000000
@@ -18,10 +21,14 @@ sudo = subprocess.Popen(['sudo', 'echo', ''])
 sudo.wait()
 
 # dump GPU memory and retrieve the pagemap from the dump
-a_out = subprocess.Popen(['./fill'])
+# a_out = subprocess.Popen(['./fill'])
+a_out = subprocess.Popen(['/home/exouser/gpu-tlb/examples/fill'])
 b_out = subprocess.Popen(['nvidia-smi', '-f', '/dev/null']) 
 b_out.wait() # in case the driver warms up very slowly
 time.sleep(2)
+
+# dumpt gpu memory to /tmp/dump, size 0x10000000, starting from 0x0
+# command: /home/exouser/gpu-tlb/dumper/dumper -b 0x10000000 -o /tmp/dump
 tmp_path = '/tmp/'
 dump = subprocess.Popen([dumper_path, '-b', '0x10000000', '-o', tmp_path + 'dump'])
 dump.wait()

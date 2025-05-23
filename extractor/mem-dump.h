@@ -3,6 +3,7 @@
 
 #define CHUNK_SIZE 4096
 
+#include <cstdint>
 #include <stdexcept>
 
 #include <fcntl.h>
