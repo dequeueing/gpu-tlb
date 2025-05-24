@@ -47,6 +47,7 @@ Apply the patch:
 
 ```
 patch -p1 < path_to_dumper/patch/driver-$NV_DRV_VERSION.patch
+<!-- patch -p1 < /home/exouser/gpu-tlb/dumper/patch/driver-$NV_DRV_VERSION.patch -->
 ```
 
 Install the patched driver:
@@ -55,12 +56,12 @@ Install the patched driver:
 sudo ./nvidia-installer
 ```
 
----
+--- 
 
 After the modified driver is installed, under the mem-dumper directory, compile the dumper:
 
 ```bash
-export CUDA_PATH=/path/to/cuda # if not already defined, such as /usr/local/cuda
+export CUDA_PATH=/path/to/cuda # if not already defined, such as/usr/local/cuda
 export NVIDIA_DRIVER_PATH=/path/to/the/patched/driver
 make
 ```

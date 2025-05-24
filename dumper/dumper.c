@@ -11,6 +11,7 @@
 #include <nvml.h>
 #include <nvtypes.h>
 #include <uvm_linux_ioctl.h>
+#include <errno.h>
 
 int 
 main(int argc, char *argv[])
@@ -152,8 +153,13 @@ main(int argc, char *argv[])
   dump_params.base_addr = base_addr;
   dump_params.dump_size = dump_size;
   dump_params.out_addr = (unsigned long)dump_ptr;
+  // if (ioctl(uvm_dev_fd, UVM_DUMP_GPU_MEMORY, &dump_params) < 0) {
+  //   printf("fail to dump GPU memory");
+  //   goto cleanup;
+  // }
   if (ioctl(uvm_dev_fd, UVM_DUMP_GPU_MEMORY, &dump_params) < 0) {
-    printf("fail to dump GPU memory");
+    perror("fail to dump GPU memory");
+    printf("errno: %d\n", errno);
     goto cleanup;
   }
   
