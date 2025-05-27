@@ -10,38 +10,23 @@
 #define BASE_ADDR   0x700000000000
 #define DUMMY_ADDR  0x7F0000000000
 
-#define PAGE_NUM    4000
+#define PAGE_NUM    5000
 //#define PAGE_NUM    2000
-#define WAIT_TIME   10000000000L // about 5 seconds on RTX3080; TODO: adapt to A100
-
-// Add error checking macro
-#define cudaCheckError() {                                          \
- cudaError_t e=cudaGetLastError();                                 \
- if(e!=cudaSuccess) {                                              \
-   printf("Cuda failure %s:%d: '%s'\n",__FILE__,__LINE__,cudaGetErrorString(e));           \
-   exit(EXIT_FAILURE);                                             \
- }                                                                 \
-}
+#define WAIT_TIME   10000000000L // about 5 seconds on RTX3080
 
 __global__ void 
 loop(volatile uint64_t *page, uint64_t x)
 {
   uint64_t y = x;
-  volatile uint64_t *ptr; //volatile ensures the compiler doesn't optimize out memory accesses
+  volatile uint64_t *ptr;
   uint64_t clk0;
   uint64_t clk1;
-
-  // print the addresses
-  // printf("page[0]: %p, page: %p\n", (void *)page[0], (void *)page);
   
   while (y == x) {
-    // init ptr as the first element of the page
-    // iterates through a linked list of 64-bit unsigned integers
-    // page[0]: start of the list
-    // ptr != page checks if ptr has reached the list's end
-    // ptr[2] accesses the third uint64_t in the node (offset 2), incrementing it.
     for (ptr = (uint64_t *)page[0]; ptr != page; ptr = (uint64_t *)ptr[0])
       ++ptr[2];
+
+    // printf("Iteration of all pages finished\n");
     
     clk0 = clock64();
     clk1 = 0;
@@ -50,9 +35,11 @@ loop(volatile uint64_t *page, uint64_t x)
     
     y = ptr[1];
   }
+
+  printf("We are outside the loop now\n");
+  printf("The value of y is: %lx\n", y);
 }
 
-// Put values into memory
 __global__ void
 put(uint64_t *page, uint64_t x1, uint64_t x2)
 {
@@ -75,27 +62,20 @@ main(int argc, char *argv[])
   cudaMallocManaged(&chunk0, CHUNK0_SIZE);
   cudaMallocManaged(&chunk1, CHUNK1_SIZE);
   
+  dummy = (uint64_t *)DUMMY_ADDR;
   base = (uint8_t *)BASE_ADDR;
   for (int i = 0; i < PAGE_NUM; ++i)
     list[i] = (uint64_t *)(base + i * STRIDE_SIZE);
-  dummy = (uint64_t *)DUMMY_ADDR;
   
-  for (int i = 0; i < PAGE_NUM; ++i) {
+  for (int i = 0; i < PAGE_NUM; ++i)
     put<<<1, 1>>>(list[i], (uint64_t)list[(i + 1) % PAGE_NUM], 0xdeadbeef);
-    cudaCheckError();
-  }
-  put<<<1, 1>>>(dummy, 0, 0);
-  // cudaCheckError();
+  put<<<1, 1>>>(dummy, 0, 0xdeadbeee);
   cudaDeviceSynchronize();
-  // cudaCheckError();
   
   loop<<<1, 1>>>(list[0], 0xdeadbeef);
-  // cudaCheckError();
   cudaDeviceSynchronize();
-  // cudaCheckError();
   
   cudaFree(chunk0);
   cudaFree(chunk1);
 }
-
 
